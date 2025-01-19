@@ -4,11 +4,13 @@ import com.lezenford.mfr.common.extensions.Logger
 import com.lezenford.mfr.common.extensions.md5
 import com.lezenford.mfr.launcher.config.properties.ApplicationProperties
 import com.lezenford.mfr.launcher.config.properties.GameProperties
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.nio.file.Path
 import kotlin.io.path.*
 
 @Service
+@Profile("!linux")
 class OpenMwService(
     private val gameProperties: GameProperties,
     private val applicationProperties: ApplicationProperties
@@ -31,10 +33,12 @@ class OpenMwService(
         val generator: (Path) -> Unit = { folder ->
             folder.resolve(templateConfigFileName).takeIf { it.exists() }?.also { template ->
                 template.readLines().map {
-                    it.replace(
+                    val result = it.replace(
                         gameProperties.openMw.configChangeValue,
                         applicationProperties.gameFolder.absolutePathString()
                     )
+
+                    if (result != it) normalize(result) else result
                 }.also {
                     folder.resolve(configFileName).writeLines(it)
                 }
@@ -59,6 +63,10 @@ class OpenMwService(
                     gameProperties.openMw.templates.basic to Configuration.BASIC
                 ).find { current.equalsConfig(it.first) }?.second ?: Configuration.CUSTOM
             }
+    }
+
+    protected fun normalize(configValue : String) : String {
+        return configValue
     }
 
     private fun copyBackup() {

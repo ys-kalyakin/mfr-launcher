@@ -1,10 +1,12 @@
 package com.lezenford.mfr.launcher.service.provider
 
 import com.lezenford.mfr.common.extensions.spec
+import com.lezenford.mfr.common.protocol.enums.SystemType
 import com.lezenford.mfr.common.protocol.http.dto.BuildDto
 import com.lezenford.mfr.common.protocol.http.dto.Client
 import com.lezenford.mfr.common.protocol.http.dto.Content
 import com.lezenford.mfr.common.protocol.http.rest.ClientApi
+import com.lezenford.mfr.launcher.config.properties.ApplicationProperties
 import com.lezenford.mfr.launcher.exception.ServerConnectionException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -22,7 +24,8 @@ import java.time.LocalDateTime
 
 @Component
 class RestProvider(
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    private val properties: ApplicationProperties,
 ) : ClientApi {
     override suspend fun findAllBuild(): Flow<BuildDto> {
         return webClient.spec(ClientApi.findAllBuild())
@@ -56,6 +59,7 @@ class RestProvider(
                     else -> throw it
                 }
             }
+            .map { normalize(it) }
             .awaitSingle()
     }
 
@@ -74,5 +78,31 @@ class RestProvider(
                     else -> throw it
                 }
             }
+    }
+
+    private fun normalize(content: Content) : Content = when(properties.platform) {
+        SystemType.LINUX -> {
+            Content(content.categories.map { it ->
+                Content.Category(
+                    it.type,
+                    it.required,
+                    it.items.map {
+                        Content.Category.Item(
+                            it.name,
+                            it.files.map { f ->
+                                Content.Category.Item.File(
+                                    f.id,
+                                    f.path.replace('\\', '/'),
+                                    f.active,
+                                    f.md5,
+                                    f.size
+                                )
+                            }
+                        )
+                    }
+                )
+            })
+        }
+        else -> content
     }
 }

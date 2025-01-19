@@ -32,7 +32,7 @@
                                                     <children>
                                                         <VBox styleClass="left" HBox.hgrow="ALWAYS">
                                                             <children>
-                                                                <Label styleClass="header"/>
+                                                                <Label styleClass="header" fx:id="classicHeader"/>
                                                                 <VBox fx:id="classicButtons" prefHeight="200.0"
                                                                       prefWidth="100.0" styleClass="list">
                                                                     <children>
@@ -108,7 +108,7 @@
                                                         </VBox>
                                                         <VBox styleClass="right" HBox.hgrow="ALWAYS">
                                                             <children>
-                                                                <Label styleClass="header"/>
+                                                                <Label styleClass="header" fx:id = "openMwHeader"/>
                                                                 <VBox fx:id="openMwButtons" prefHeight="200.0"
                                                                       prefWidth="100.0" styleClass="list">
                                                                     <children>

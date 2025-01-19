@@ -2,6 +2,7 @@ package com.lezenford.mfr.launcher.task
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.lezenford.mfr.common.protocol.enums.ContentType
+import com.lezenford.mfr.common.protocol.enums.SystemType.WINDOWS
 import com.lezenford.mfr.launcher.config.properties.ApplicationProperties
 import com.lezenford.mfr.launcher.config.properties.GameProperties
 import com.lezenford.mfr.launcher.exception.NotEnoughSpaceException
@@ -47,6 +48,7 @@ class GameInstallTask(
 
         val content = restProvider.findBuild(State.currentGameBuild.first { it > 0 })
 
+
         val freeSpace = (properties.gameFolder.root.toFile().usableSpace / 1024.0).toLong()
         val totalNeedSpace =
             (content.categories.first { it.type == ContentType.MAIN }.items.flatMap { it.files }
@@ -58,7 +60,8 @@ class GameInstallTask(
 
         val optionFiles = withContext(Dispatchers.IO) {
             sectionService.findAllWithDetails().flatMap { it.options }.filter { it.applied }.flatMap { it.files }
-                .map { it.gamePath }.toSet()
+                .map { it.gamePath }
+                .toSet()
         }
 
         val files = content.categories.first { it.type == ContentType.MAIN }.items
@@ -87,8 +90,12 @@ class GameInstallTask(
         openMwService.prepareTemplates()
         openMwService.applyConfig(OpenMwService.Configuration.MIDDLE, false)
 
-        runnerService.startMge().also {
-            delay(4000)
-        }.destroy()
+        when(properties.platform) {
+            WINDOWS -> runnerService.startMge().also {
+                delay(4000)
+            }.destroy()
+            else -> Unit
+        }
     }
+
 }
