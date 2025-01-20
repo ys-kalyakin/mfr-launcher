@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.lezenford.mfr.common.extensions.Logger
 import com.lezenford.mfr.common.extensions.md5
 import com.lezenford.mfr.common.extensions.toPath
+import com.lezenford.mfr.common.protocol.enums.SystemType.LINUX
 import com.lezenford.mfr.common.protocol.file.SCHEMA_FILE_NAME
 import com.lezenford.mfr.common.protocol.file.Schema
 import com.lezenford.mfr.launcher.config.properties.ApplicationProperties
@@ -60,8 +61,8 @@ class FillSchemeTask(
                                     files.addAll(
                                         option.items.map { item ->
                                             OptionFile(
-                                                storagePath = item.storagePath,
-                                                gamePath = item.gamePath,
+                                                storagePath = normalizePath(item.storagePath),
+                                                gamePath = normalizePath(item.gamePath),
                                                 md5 = item.md5,
                                                 option = this
                                             )
@@ -80,7 +81,7 @@ class FillSchemeTask(
                     ).also { createdExtra ->
                         incomingExtra.items.map { item ->
                             ExtraFile(
-                                path = item.path,
+                                path = normalizePath(item.path),
                                 md5 = item.md5,
                                 extra = createdExtra
                             )
@@ -123,6 +124,13 @@ class FillSchemeTask(
 
                 propertiesService.updateValue(Properties.Key.SCHEMA, currentSchemaMd5)
             }
+        }
+    }
+
+    private fun normalizePath(path: String) : String {
+        return when(properties.platform) {
+            LINUX -> path.replace("\\", "/")
+            else -> path
         }
     }
 

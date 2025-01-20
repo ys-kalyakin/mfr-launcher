@@ -1,0 +1,15 @@
+application:
+  platform: LINUX
+game:
+  versionFile: Optional/version
+  openMw:
+    application: openmw-linux/openmw
+    launcher: openmw-linux/openmw-launcher
+    config-folder: .config/openmw
+    config-backup-folder: .config/openmw/backup
+    config-change-value: D:\Games\MFR\game
+    templates:
+      high: OpenMW/OpenMW_Config/top_PC
+      middle: OpenMW/OpenMW_Config/mid_PC
+      low: OpenMW/OpenMW_Config/low_PC
+      basic: OpenMW/OpenMW_Config/necro_PC

@@ -2,6 +2,7 @@ package com.lezenford.mfr.launcher.javafx.controller
 
 import com.dustinredmond.fxtrayicon.FXTrayIcon
 import com.lezenford.mfr.common.extensions.Logger
+import com.lezenford.mfr.common.protocol.enums.SystemType
 import com.lezenford.mfr.javafx.component.FxController
 import com.lezenford.mfr.javafx.extensions.runFx
 import com.lezenford.mfr.launcher.config.properties.ApplicationProperties
@@ -39,7 +40,9 @@ class LauncherController(
     private val launcherPath: Label by fxml()
     private val version: Label by fxml()
     private val launcherVersion: Label by fxml()
+    private val classicHeader: Label by fxml()
     private val classicButtons: VBox by fxml()
+    private val openMwHeader: Label by fxml()
     private val openMwButtons: VBox by fxml()
     private val gameSettingButton: Button by fxml()
     private val consistencyCheckButton: Button by fxml()
@@ -69,6 +72,12 @@ class LauncherController(
             log.error("Tray icon is not supported on this platform")
             launch { State.minimizeToTray.emit(false) }
             useTrayCheckbox.isDisable = true
+        }
+
+        openMwHeader.isVisible = true
+        if (SystemType.LINUX == applicationProperties.platform) {
+            classicButtons.isVisible = false
+            classicHeader.isVisible = false
         }
 
         State.onlineMode.listener(coroutineContext) { enable ->
